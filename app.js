@@ -50,6 +50,19 @@ app.get('/products/search/:keyword', (req, res) => {
   });
 });
 
+// API: Post
+app.post('/products', (req, res) =>{
+  const { name, price, discount, review_count, image_url } = req.body;
+  RTCPeerConnection.query(
+    'insert into products (name, price, discount, review_count, image_url) values (?,?,?,?,?)',
+    [name, price, discount, review_count, image_url],
+    (err, results) => {
+        if (err) return res.status(500).json({ error: err.message});
+        res.status(201).json({ id: results.insertId, message: 'Product created'});
+    }
+  )
+})
+
 // Start Server
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
