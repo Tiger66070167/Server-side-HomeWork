@@ -4,6 +4,8 @@ const mysql = require('mysql2');
 const app = express();
 const port = 3000;
 
+app.use(express.json())
+
 // Database connected
 const db = mysql.createConnection({
   host: process.env.DB_HOST,
@@ -50,15 +52,40 @@ app.get('/products/search/:keyword', (req, res) => {
   });
 });
 
-// API: Post
+// API: Post create/add products
 app.post('/products', (req, res) =>{
   const { name, price, discount, review_count, image_url } = req.body;
-  RTCPeerConnection.query(
+  db.query(
     'insert into products (name, price, discount, review_count, image_url) values (?,?,?,?,?)',
     [name, price, discount, review_count, image_url],
     (err, results) => {
         if (err) return res.status(500).json({ error: err.message});
         res.status(201).json({ id: results.insertId, message: 'Product created'});
+    }
+  )
+})
+
+// API: put edit products
+app.put('/products/:id', (req, res) =>{
+  const { name, price, discount, review_count, image_url } = req.body;
+  db.query(
+    'update products set name = ? , price = ?, discount = ?, review_count = ?, image_url = ? where id = ?',
+    [name, price, discount, review_count, image_url, req.params.id],
+    (err) => {
+        if (err) return res.status(500).json({ error: err.message});
+        res.status(201).json({ message: 'Product updated'});
+    }
+  )
+})
+
+// API: delete products
+app.delete('/products/:id', (req, res) =>{
+  db.query(
+    'delete from products where id = ?',
+    [req.params.id],
+    (err) => {
+        if (err) return res.status(500).json({ error: err.message});
+        res.status(201).json({ message: 'Product delete'});
     }
   )
 })
